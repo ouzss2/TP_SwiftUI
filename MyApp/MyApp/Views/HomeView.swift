@@ -5,65 +5,60 @@
 //  Created by Tekup-mac-1 on 14/10/2024.
 //
 import SwiftUI
-
+import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var viewModel = CarViewModel()
+    @StateObject private var viewModel = MovieViewModel()
     
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.green)
-            Text("Welcome to Home")
+            Text("Top Movies")
                 .font(.title)
-            
+                .padding()
             
             Text(currentDate)
                 .font(.subheadline)
-                .padding(.top, 8)
+                .padding(.bottom, 8)
             
-            if let car = viewModel.car {
-                VStack {
-                    Text("Car Details").font(.title).padding()
-                    Text("Make: \(car.make)")
-                    Text("Model: \(car.model)")
-                    Text("Year: \(car.year)")
-                    Text("VIN: \(car.vin)")
-                    Text("Price: \(car.price)")
-                    Text("Mileage: \(car.mileage)")
-                    Text("Condition: \(car.condition)")
-                    Text("Dealer: \(car.dealerName)")
-                    
-                    AsyncImage(url: URL(string: car.primaryPhotoUrl)) { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 300, height: 200)
-                    } placeholder: {
-                        ProgressView() // Show a progress indicator while the image is loading
-                    }
-                }
+            if viewModel.movies.isEmpty {
+                Text("Loading movies...")
+                    .font(.headline)
+                    .padding()
             } else {
-                Text("Loading car data...")
+                List(viewModel.movies) { movie in
+                    HStack {
+                        AsyncImage(url: URL(string: movie.image)) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Rectangle())
+                                .cornerRadius(10)
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        
+                        Text(movie.title)
+                            .font(.headline)
+                            .padding(.leading, 10)
+                    }
+                    .padding(.vertical, 5)
+                }
             }
         }
         .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            viewModel.fetchCarData() // Fetch the car data when the view appears
+            viewModel.fetchMovies()
         }
     }
     
-    // Create a computed property to format the current date
     var currentDate: String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .long // Set the date style (e.g., October 14, 2024)
+        dateFormatter.dateStyle = .long
         return dateFormatter.string(from: Date())
     }
 }
 
-
 #Preview {
     HomeView()
 }
-
